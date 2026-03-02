@@ -91,6 +91,47 @@ input.svg-value {
     padding-right:1px;
 }
 
+// Custom extension sub-row
+.delta-row {
+    padding-bottom: 3px !important;
+    opacity: 0.85;
+}
+.delta-type-token {
+    font-size: 13px !important;
+    background-color: rgba(100, 100, 100, 0.35) !important;
+    border-color: rgba(200, 200, 200, 0.3) !important;
+    cursor: default !important;
+}
+input.svg-delta {
+    width: 38px;
+    text-align: center;
+    font-size: 10px;
+    margin-left: 1px;
+    margin-right: 1px;
+    padding-left: 1px;
+    padding-right: 1px;
+    opacity: 0.75;
+}
+span.delta-arc-spacer {
+    display: inline-block;
+    width: 20px;    // approximate mat-checkbox width — keeps delta inputs aligned
+    flex-shrink: 0;
+    margin-left: 1px;
+    margin-right: 1px;
+}
+select.timing-select {
+    font-size: 10px;
+    height: 20px;
+    margin-left: 4px;
+    padding: 0 2px;
+    max-width: 110px;
+    background: transparent;
+    color: inherit;
+    border: 1px solid rgba(200, 200, 200, 0.3);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
 .type-token {
     margin:0 1px;
     font-size: 12px;

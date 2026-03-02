@@ -366,12 +366,36 @@ export class AppComponent implements AfterViewInit {
     this.afterModelChange();
   }
 
+  // Known timing function names (matching Swift TimingFunction enum cases).
+  readonly timingFunctions = [
+    'linear',
+    'sineEaseIn', 'sineEaseOut', 'sineEaseInOut',
+    'cubicEaseIn', 'cubicEaseOut', 'cubicEaseInOut',
+    'quintEaseIn', 'quintEaseOut', 'quintEaseInOut',
+    'smoothStep', 'smootherStep',
+  ];
+
   setValue(item: SvgItem, idx: number, val: number) {
     if (!isNaN(val)) {
       item.values[idx] = val;
       this.parsedPath.refreshAbsolutePositions();
       this.afterModelChange();
     }
+  }
+
+  setDelta(item: SvgItem, idx: number, raw: string) {
+    const n = parseFloat(raw);
+    item.deltas[idx] = raw === '' || isNaN(n) ? null : Math.abs(n);
+    this.afterModelChange();
+  }
+
+  setTimingAnnotation(item: SvgItem, val: string) {
+    item.timingAnnotation = val || null;
+    this.afterModelChange();
+  }
+
+  hasAnyDelta(item: SvgItem): boolean {
+    return item.deltas.some(d => d !== null);
   }
 
   delete(item: SvgItem) {
@@ -396,7 +420,7 @@ export class AppComponent implements AfterViewInit {
 
   afterModelChange() {
     this.reloadPoints();
-    this.rawPath = this.parsedPath.asString(4, this.cfg.minifyOutput);
+    this.rawPath = this.parsedPath.asExtendedString(4, this.cfg.minifyOutput);
   }
 
   roundValues(decimals: number) {

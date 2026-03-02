@@ -259,53 +259,96 @@
 
 
             <app-expandable panelTitle="Commands" [opened]="true">
-                <div *ngFor="let item of parsedPath.path; let j=index"
-                    (mouseenter)="hoveredItem=item"
-                    (mouseleave)="hoveredItem=null"
-                    [ngClass]="{
-                        hovered:item===hoveredItem && !draggedPoint,
-                        dragged:(draggedPoint && item===draggedPoint.itemReference) || (focusedItem === item)
-                    }"
-                    class="row"
-                    style="padding-top:1px; padding-bottom:1px;"
-                    (click)="focusedItem=item"
-                    id="svg_command_row_{{j}}"
-                >
+                <ng-container *ngFor="let item of parsedPath.path; let j=index">
+                    <!-- Main command row -->
                     <div
-                        class="type-token"
-                        [ngClass]="{'type-token-relative':item.relative}"
-                        style="user-select: none;-webkit-user-select: none;"
-                        (click)="item.setRelative(!item.relative); afterModelChange();"
-                    >{{item.getType()}}</div>
-                    <ng-container *ngFor="let value of item.values; let i = index; trackBy:trackByIndex">
-                        <mat-checkbox *ngIf="item.getType().toLowerCase()==='a' && (i===3 || i===4)"
-                            [ngModel]="value"
-                            (ngModelChange)="setValue(item,i,$event?1:0);"
-                            (focus)="focusedItem=item"
-                            class="small-checkbox"
-                            matTooltipClass="app-tooltip"
-                            [matTooltip]="getTooltip(item, i)"
-                        ></mat-checkbox>
-                        <input *ngIf="!(item.getType().toLowerCase()==='a' && (i===3 || i===4))"
-                            type="text"
-                            appKeyboardNavigable
-                            keyboardNavigableIdPrefix="svg_command"
-                            appFormatter
-                            [numberValue]="value"
-                            (numberValueChange)="setValue(item,i,$event);"
-                            class="svg-value app-input"
-                            id="svg_command_{{j}}_{{item.getType().toLowerCase()==='a' && i>4 ? i-1 : i}}"
-                            (focus)="focusedItem=item"
-                            matTooltipClass="app-tooltip"
-                            [matTooltip]="getTooltip(item, i)"
-                        >
-                    </ng-container>
+                        (mouseenter)="hoveredItem=item"
+                        (mouseleave)="hoveredItem=null"
+                        [ngClass]="{
+                            hovered:item===hoveredItem && !draggedPoint,
+                            dragged:(draggedPoint && item===draggedPoint.itemReference) || (focusedItem === item)
+                        }"
+                        class="row"
+                        style="padding-top:1px; padding-bottom:1px;"
+                        (click)="focusedItem=item"
+                        id="svg_command_row_{{j}}"
+                    >
+                        <div
+                            class="type-token"
+                            [ngClass]="{'type-token-relative':item.relative}"
+                            style="user-select: none;-webkit-user-select: none;"
+                            (click)="item.setRelative(!item.relative); afterModelChange();"
+                        >{{item.getType()}}</div>
+                        <ng-container *ngFor="let value of item.values; let i = index; trackBy:trackByIndex">
+                            <mat-checkbox *ngIf="item.getType().toLowerCase()==='a' && (i===3 || i===4)"
+                                [ngModel]="value"
+                                (ngModelChange)="setValue(item,i,$event?1:0);"
+                                (focus)="focusedItem=item"
+                                class="small-checkbox"
+                                matTooltipClass="app-tooltip"
+                                [matTooltip]="getTooltip(item, i)"
+                            ></mat-checkbox>
+                            <input *ngIf="!(item.getType().toLowerCase()==='a' && (i===3 || i===4))"
+                                type="text"
+                                appKeyboardNavigable
+                                keyboardNavigableIdPrefix="svg_command"
+                                appFormatter
+                                [numberValue]="value"
+                                (numberValueChange)="setValue(item,i,$event);"
+                                class="svg-value app-input"
+                                id="svg_command_{{j}}_{{item.getType().toLowerCase()==='a' && i>4 ? i-1 : i}}"
+                                (focus)="focusedItem=item"
+                                matTooltipClass="app-tooltip"
+                                [matTooltip]="getTooltip(item, i)"
+                            >
+                        </ng-container>
 
-                    <div style="flex:1"></div>
-                    <button mat-icon-button [matMenuTriggerFor]="appMenu" [matMenuTriggerData]="{item:item, idx:j}" class="more-button">
-                        <mat-icon svgIcon="more"></mat-icon>
-                    </button>
-                </div>
+                        <div style="flex:1"></div>
+                        <button mat-icon-button [matMenuTriggerFor]="appMenu" [matMenuTriggerData]="{item:item, idx:j}" class="more-button">
+                            <mat-icon svgIcon="more"></mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Extension sub-row: ±delta inputs + @timing select (shown when focused or any extension is set) -->
+                    <div *ngIf="focusedItem === item || hasAnyDelta(item) || item.timingAnnotation"
+                        [ngClass]="{
+                            hovered:item===hoveredItem && !draggedPoint,
+                            dragged:(draggedPoint && item===draggedPoint.itemReference) || (focusedItem === item)
+                        }"
+                        class="row delta-row"
+                        (click)="focusedItem=item"
+                    >
+                        <div class="type-token delta-type-token">±</div>
+                        <ng-container *ngFor="let value of item.values; let i = index; trackBy:trackByIndex">
+                            <!-- Arc flags (checkboxes) get a same-width spacer -->
+                            <span *ngIf="item.getType().toLowerCase()==='a' && (i===3 || i===4)"
+                                class="delta-arc-spacer"></span>
+                            <!-- Delta input for coordinate values -->
+                            <input *ngIf="!(item.getType().toLowerCase()==='a' && (i===3 || i===4))"
+                                type="text"
+                                class="svg-delta app-input"
+                                [value]="item.deltas[i] != null ? item.deltas[i] : ''"
+                                placeholder="–"
+                                (change)="setDelta(item, i, $any($event.target).value)"
+                                (focus)="focusedItem=item"
+                                matTooltipClass="app-tooltip"
+                                [matTooltip]="getTooltip(item, i) + ' ±delta'"
+                            >
+                        </ng-container>
+                        <!-- Timing function annotation -->
+                        <select class="timing-select"
+                            [ngModel]="item.timingAnnotation || ''"
+                            (ngModelChange)="setTimingAnnotation(item, $event)"
+                            (focus)="focusedItem=item"
+                            matTooltipClass="app-tooltip"
+                            matTooltip="Timing function @annotation"
+                        >
+                            <option value="">&#64;—</option>
+                            <option *ngFor="let fn of timingFunctions" [value]="fn">&#64;{{fn}}</option>
+                        </select>
+                        <div style="flex:1"></div>
+                    </div>
+                </ng-container>
             </app-expandable>
             <div class="spacer"></div>
         </div>

@@ -1,4 +1,4 @@
-import { PathParser } from './path-parser';
+import { PathParser, SvgItemExtensions } from './path-parser';
 import type { SvgCommandType, SvgCommandTypeAny, SvgCommandTypeRelative } from './svg-command-types';
 
 export function formatNumber(v: number, d: number, minify = false): string {
@@ -49,11 +49,15 @@ export abstract class SvgItem {
     }
     relative: boolean;
     values: number[];
+    /** Per-value variation deltas (parallel to values), null = no delta. Custom extension. */
+    deltas: (number | null)[] = [];
+    /** Timing function annotation name (without '@'), null = none. Custom extension. */
+    timingAnnotation: string | null = null;
     previousPoint: Point = new Point(0, 0);
     absolutePoints: SvgPoint[] = [];
     absoluteControlPoints: SvgControlPoint[] = [];
 
-    public static Make(rawItem: string[]): SvgItem {
+    public static Make(rawItem: string[], extensions?: SvgItemExtensions): SvgItem {
         let result: SvgItem | undefined = undefined;
         const relative = rawItem[0].toUpperCase() !== rawItem[0];
         const values = rawItem.slice(1).map( it => parseFloat(it) );
@@ -73,6 +77,11 @@ export abstract class SvgItem {
         if(!result) {
             throw new Error(`Invalid SVG command: ${rawItem[0]}`);
         }
+        // Apply custom extensions (deltas padded/truncated to match values length).
+        result.deltas = Array.from({ length: result.values.length }, (_, i) =>
+            extensions?.deltas[i] ?? null
+        );
+        result.timingAnnotation = extensions?.annotation ?? null;
         return result;
     }
 
@@ -243,11 +252,29 @@ export abstract class SvgItem {
         ].join(' ');
     }
 
+    /** Clean SVG string — no custom extensions. Used for canvas rendering and SVG export. */
     public asString(decimals = 4, minify = false, trailingItems: SvgItem[] = []): string {
         const strValues = [this.values, ...trailingItems.map(it => it.values)]
             .reduce((acc, val) => acc.concat(val), [])
             .map(it => formatNumber(it, decimals, minify));
         return [this.getType(), ...strValues].join(' ');
+    }
+
+    /** Extended string including ±delta and @annotation. Used for textarea / storage. */
+    public asExtendedString(decimals = 4, minify = false, trailingItems: SvgItem[] = []): string {
+        const allItems = [this as SvgItem, ...trailingItems];
+        const parts: string[] = [this.getType()];
+        for (const item of allItems) {
+            for (let i = 0; i < item.values.length; i++) {
+                const v = formatNumber(item.values[i], decimals, minify);
+                const d = item.deltas[i] ?? null;
+                parts.push(d !== null ? `${v}\u00b1${formatNumber(d, decimals, minify)}` : v);
+            }
+            if (item.timingAnnotation) {
+                parts.push(`@${item.timingAnnotation}`);
+            }
+        }
+        return parts.join(' ');
     }
 }
 
@@ -519,8 +546,9 @@ export class SvgPath {
     path: SvgItem[];
 
     constructor(path: string) {
+        const extensions = PathParser.extractCustomExtensions(path);
         const rawPath = PathParser.parse(path);
-        this.path = rawPath.map( it => SvgItem.Make(it) );
+        this.path = rawPath.map((it, idx) => SvgItem.Make(it, extensions[idx]));
         this.refreshAbsolutePositions();
     }
 
@@ -613,10 +641,8 @@ export class SvgPath {
         return null;
     }
 
-    asString(decimals = 4, minify = false): string {
-        return this.path
-        .reduce((acc: {type?: string, item: SvgItem, trailing: SvgItem[]}[], it: SvgItem) => {
-            // Group together the items that can be merged (M 0 0 L 1 1 => M 0 0 1 1)
+    private _buildGroups(minify: boolean): {type?: string, item: SvgItem, trailing: SvgItem[]}[] {
+        return this.path.reduce((acc: {type?: string, item: SvgItem, trailing: SvgItem[]}[], it: SvgItem) => {
             const type = it.getType();
             if (minify && acc.length > 0) {
                 const last = acc[acc.length - 1];
@@ -631,9 +657,30 @@ export class SvgPath {
                 trailing: []
             });
             return acc;
-        }, [])
+        }, []);
+    }
+
+    /** Clean SVG path string — no custom extensions. Safe for SVG d attribute. */
+    asString(decimals = 4, minify = false): string {
+        return this._buildGroups(minify)
         .map(it => {
             const str = it.item.asString(decimals, minify, it.trailing);
+            if (minify) {
+                return str
+                    .replace(/^([a-z]) /i, '$1')
+                    .replace(/ -/g, '-')
+                    .replace(/(\.[0-9]+) (?=\.)/g, '$1');
+            } else {
+                return str;
+            }
+        }).join(minify ? '' : ' ');
+    }
+
+    /** Extended path string including ±delta and @annotation. For textarea / storage. */
+    asExtendedString(decimals = 4, minify = false): string {
+        return this._buildGroups(minify)
+        .map(it => {
+            const str = it.item.asExtendedString(decimals, minify, it.trailing);
             if (minify) {
                 return str
                     .replace(/^([a-z]) /i, '$1')

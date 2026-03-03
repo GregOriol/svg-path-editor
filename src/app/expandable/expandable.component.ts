@@ -17,9 +17,12 @@ export class ExpandableComponent {
   @Input() opened = true;
   @Input() panelTitle = '';
   @Input() panelInfo = '';
+  @Input() foldable = true;
 
   toggle() {
-    this.opened = !this.opened;
+    if (this.foldable) {
+      this.opened = !this.opened;
+    }
   }
 
 }

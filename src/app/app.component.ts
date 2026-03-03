@@ -15,9 +15,7 @@ import { optimizePath } from '../lib/optimize-path';
 import { changePathOrigin } from 'src/lib/change-path-origin';
 import { KEYBOARD } from './constants/keyboard.const';
 
-export const kDefaultPath = `M 4 8 L 10 1 L 13 0 L 12 3 L 5 9 C 6 10 6 11 7 10 C 7 11 8 12 7 12 A 1.42 1.42 0 0 1 6 13 `
-+ `A 5 5 0 0 0 4 10 Q 3.5 9.9 3.5 10.5 T 2 11.8 T 1.2 11 T 2.5 9.5 T 3 9 A 5 5 90 0 0 0 7 A 1.42 1.42 0 0 1 1 6 `
-+ `C 1 5 2 6 3 6 C 2 7 3 7 4 8 M 10 1 L 10 3 L 12 3 L 10.2 2.8 L 10 1`;
+export const kDefaultPath = `M 32\u00b110 -4\u00b110 S 86 6 86\u00b15 50\u00b15 @sineEaseIn C 86 57 87 80 50\u00b15 80\u00b15 @sineEaseOut C 23 80 20 60 20\u00b15 50\u00b15 C 20 40 35 30 50\u00b15 30\u00b15 C 67 30 76 51 66 61 C 59 68 39 66 50\u00b15 50\u00b15`;
 
 @Component({
   selector: 'app-root',
@@ -306,7 +304,7 @@ export class AppComponent implements AfterViewInit {
     if (this.cfg.viewPortLocked) {
       return;
     }
-    const bbox = browserComputePathBoundingBox(this.rawPath);
+    const bbox = browserComputePathBoundingBox(this.parsedPath.asString(4, false));
 
     const k = this.canvasHeight / this.canvasWidth;
     let w = bbox.width + 2;

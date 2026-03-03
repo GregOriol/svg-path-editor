@@ -6,7 +6,7 @@
             <mat-icon>arrow_left</mat-icon>
         </button>
         <div class="left-column" cdk-scrollable>
-            <app-expandable panelTitle="Path" [panelInfo]="rawPath.length.toString()" [opened]="true">
+            <app-expandable panelTitle="Path" [panelInfo]="rawPath.length.toString()" [opened]="true" [foldable]="false">
                 <div class="row">
                     <div class="input-block" style="flex-grow:1"  [class.has-error]="invalidSyntax">
                         <label class="opaque">Path</label>
@@ -55,7 +55,9 @@
                 </div>
             </app-expandable>
 
-            <app-expandable panelTitle="Configuration" [opened]="true">
+            <app-expandable panelTitle="Configuration" [opened]="false">
+                <!-- ViewBox X/Y/Width/Height, lock, Snap to Grid and Point Precision hidden
+
                 <div class="row">
                     <div class="input-block" [ngClass]="{'disabled': cfg.viewPortLocked }">
                         <label>X</label>
@@ -128,6 +130,8 @@
                             [disabled]="cfg.snapToGrid">
                     </div>
                 </div>
+                
+                -->
                 <div class="row">
                     <mat-checkbox [(ngModel)]="cfg.showTicks" style="flex:1">Show Ticks</mat-checkbox>
                     <div class="input-block" style="flex:1"
@@ -142,15 +146,17 @@
                             [disabled]="!cfg.showTicks">
                     </div>
                 </div>
+                <!-- Fill / Preview / Minify output hidden; kept unchecked
                 <div class="row">
                     <mat-checkbox [(ngModel)]="cfg.filled" style="flex:1">Fill</mat-checkbox>
                     <mat-checkbox [(ngModel)]="cfg.preview" style="flex:1">Preview</mat-checkbox>
                     <mat-checkbox [ngModel]="cfg.minifyOutput" (ngModelChange)="cfg.minifyOutput=$event;afterModelChange()" style="flex:1">Minify output</mat-checkbox>
                 </div>
+                -->
 
             </app-expandable>
 
-            <app-expandable panelTitle="Path Operations" [opened]="true">
+            <app-expandable panelTitle="Path Operations" [opened]="false">
                 <div class="row path-operations-grid">
                     <div class="input-block" style="flex:1">
                         <label>Scale X</label>
@@ -258,7 +264,7 @@
             </app-expandable>
 
 
-            <app-expandable panelTitle="Commands" [opened]="true">
+            <app-expandable panelTitle="Commands" [opened]="true" [foldable]="false">
                 <ng-container *ngFor="let item of parsedPath.path; let j=index">
                     <!-- Main command row -->
                     <div
@@ -445,6 +451,7 @@
             <app-share [path]="rawPath"></app-share>
         </div>
         <div class="scene-bottom-actions">
+            <!-- Snap to Grid button hidden
             <button
                 mat-mini-fab
                 color="primary"
@@ -454,6 +461,7 @@
             >
                 <mat-icon> {{ cfg.snapToGrid ? 'grid_on' : 'grid_off' }}</mat-icon>
             </button>
+            -->
             <button
                 mat-mini-fab
                 color="primary"

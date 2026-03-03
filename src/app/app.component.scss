@@ -8,6 +8,7 @@
     box-sizing: border-box;
 }
 .footer {
+    display: none; // was: flex
     position: fixed;
     left:0;
     height:28px;
@@ -15,7 +16,6 @@
     bottom:0px;
     background-color: #111111;
     font-size: 14px;
-    display: flex;
     justify-content: space-evenly;
     align-items: center;
     a {
@@ -52,6 +52,7 @@
 .left-column {
     width:100%;
     overflow:auto;
+    overflow-x:hidden;
     background-color:#252526;
     height: calc(100% - 28px);
 }

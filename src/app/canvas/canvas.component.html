@@ -60,6 +60,13 @@
     </ng-container>
 
 
+    <!-- Screen area reference: 100×75 units (width-based scale, 4:3 ratio) -->
+    <svg:rect
+        class="screen-rect"
+        x="0" y="0" width="100" height="75"
+        [attr.stroke-width]="strokeWidth"
+    />
+
     <svg:path
         [class.filled]="filled"
         [attr.d]="parsedPath?.asString()"

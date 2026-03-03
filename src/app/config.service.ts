@@ -33,10 +33,10 @@ function save() {
   providedIn: 'root'
 })
 export class ConfigService {
-  @save() viewPortX = -30;
-  @save() viewPortY = -20;
-  @save() viewPortWidth = 150;
-  @save() viewPortHeight = 30;
+  @save() viewPortX = -15;
+  @save() viewPortY = -15;
+  @save() viewPortWidth = 130;
+  @save() viewPortHeight = 105;
   @save() viewPortLocked = false;
   @save() filled = false;
   @save() preview = false;

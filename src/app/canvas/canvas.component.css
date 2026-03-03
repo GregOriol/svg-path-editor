@@ -17,6 +17,13 @@ path.dragged {
     stroke: rgb(0, 174, 255);
     fill: none;
 }
+rect.screen-rect {
+    fill: none;
+    stroke: rgba(100, 180, 255, 0.35);
+    stroke-dasharray: 4 4;
+    pointer-events: none;
+}
+
 line.grid {
     stroke:#353536;
 }

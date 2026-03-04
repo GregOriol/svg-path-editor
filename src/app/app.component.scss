@@ -8,7 +8,7 @@
     box-sizing: border-box;
 }
 .footer {
-    display: none; // was: flex
+    display: flex;
     position: fixed;
     left:0;
     height:28px;
@@ -161,10 +161,38 @@ div.dragged {
     background-color:#094771;
 }
 
+.path-insert-buttons {
+    display: flex;
+    gap: 3px;
+    padding: 3px 0 0;
+    button {
+        height: 20px;
+        min-width: 24px;
+        padding: 0 6px;
+        font-size: 13px;
+        line-height: 20px;
+        background: transparent;
+        color: #c8c8c8;
+        border: 1px solid rgba(200, 200, 200, 0.3);
+        border-radius: 2px;
+        cursor: pointer;
+        &:hover {
+            background: rgba(200, 200, 200, 0.1);
+        }
+    }
+}
 .path-buttons {
     display: flex;
     margin-top: 4px;
     width: 100%;
+}
+.app-path-export {
+    margin-top: 4px;
+    textarea {
+        width: 100%;
+        opacity: 0.85;
+        border: 1px solid rgba(200, 200, 200, 0.3);
+    }
 }
 textarea {
     vertical-align: top;

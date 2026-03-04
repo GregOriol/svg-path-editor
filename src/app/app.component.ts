@@ -82,6 +82,9 @@ export class AppComponent implements AfterViewInit {
   isLeftPanelOpened = true;
   isContextualMenuOpened = false;
   isEditingImages = false;
+  showingAppPath = false;
+  appPathString = '';
+  private isImportingFromApp = false;
 
   // Utility functions:
   max = Math.max;
@@ -364,13 +367,28 @@ export class AppComponent implements AfterViewInit {
     this.afterModelChange();
   }
 
+  private readonly kAppPathScales: Record<string, number[]> = {
+    'M': [1/100, 1/75], 'L': [1/100, 1/75], 'T': [1/100, 1/75],
+    'H': [1/100],
+    'V': [1/75],
+    'C': [1/100, 1/75, 1/100, 1/75, 1/100, 1/75],
+    'S': [1/100, 1/75, 1/100, 1/75],
+    'Q': [1/100, 1/75, 1/100, 1/75],
+    'A': [1/100, 1/75, 1, 1, 1, 1/100, 1/75],
+    'Z': [],
+  };
+
   // Known timing function names (matching Swift TimingFunction enum cases).
   readonly timingFunctions = [
     'linear',
-    'sineEaseIn', 'sineEaseOut', 'sineEaseInOut',
-    'cubicEaseIn', 'cubicEaseOut', 'cubicEaseInOut',
-    'quintEaseIn', 'quintEaseOut', 'quintEaseInOut',
     'smoothStep', 'smootherStep',
+    'sineEaseIn', 'sineEaseOut', 'sineEaseInOut',
+    'quadraticEaseIn', 'quadraticEaseOut', 'quadraticEaseInOut',
+    'cubicEaseIn', 'cubicEaseOut', 'cubicEaseInOut',
+    'quarticEaseIn', 'quarticEaseOut', 'quarticEaseInOut',
+    'quinticEaseIn', 'quinticEaseOut', 'quinticEaseInOut',
+    'circularEaseIn', 'circularEaseOut', 'circularEaseInOut',
+    'exponentialEaseIn', 'exponentialEaseOut', 'exponentialEaseInOut',
   ];
 
   setValue(item: SvgItem, idx: number, val: number) {
@@ -396,6 +414,17 @@ export class AppComponent implements AfterViewInit {
     return item.deltas.some(d => d !== null);
   }
 
+  insertIntoPath(text: string, textarea: HTMLTextAreaElement) {
+    const start = textarea.selectionStart ?? this.rawPath.length;
+    const end = textarea.selectionEnd ?? this.rawPath.length;
+    const newValue = this.rawPath.substring(0, start) + text + this.rawPath.substring(end);
+    this.reloadPath(newValue, newValue.length > 0);
+    setTimeout(() => {
+      textarea.selectionStart = textarea.selectionEnd = start + text.length;
+      textarea.focus();
+    }, 0);
+  }
+
   delete(item: SvgItem) {
     this.focusedItem = null;
     this.parsedPath.delete(item);
@@ -419,6 +448,9 @@ export class AppComponent implements AfterViewInit {
   afterModelChange() {
     this.reloadPoints();
     this.rawPath = this.parsedPath.asExtendedString(4, this.cfg.minifyOutput);
+    if (this.showingAppPath && !this.isImportingFromApp) {
+      this.appPathString = this.generateAppPathString();
+    }
   }
 
   roundValues(decimals: number) {
@@ -526,6 +558,9 @@ export class AppComponent implements AfterViewInit {
       if (autozoom) {
         this.zoomAuto();
       }
+      if (this.showingAppPath && !this.isImportingFromApp) {
+        this.appPathString = this.generateAppPathString();
+      }
     } catch (e) {
       this.invalidSyntax = true;
       if (!this.parsedPath) {
@@ -541,6 +576,58 @@ export class AppComponent implements AfterViewInit {
 
   toggleLeftPanel(): void {
     this.isLeftPanelOpened = !this.isLeftPanelOpened;
+  }
+
+  toggleAppPath(): void {
+    this.showingAppPath = !this.showingAppPath;
+    if (this.showingAppPath) {
+      this.appPathString = this.generateAppPathString();
+    }
+  }
+
+  importFromAppString(str: string): void {
+    if (!str.trim()) return;
+    try {
+      const tempPath = new SvgPath(str);
+      const scaled = tempPath.path.map(item => {
+        const type = item.getType();
+        const factors = this.kAppPathScales[type.toUpperCase()] ?? [];
+        const parts: string[] = [type];
+        for (let i = 0; i < item.values.length; i++) {
+          const f = factors[i % factors.length] ?? 1;
+          const inv = f !== 0 ? 1 / f : 1;
+          const v = Math.round(item.values[i] * inv);
+          const d = item.deltas[i] != null ? Math.round(item.deltas[i]! * inv) : null;
+          parts.push(d != null ? `${v}\u00b1${d}` : `${v}`);
+        }
+        if (item.timingAnnotation) parts.push(`@${item.timingAnnotation}`);
+        return parts.join(' ');
+      }).join(' ');
+      this.isImportingFromApp = true;
+      try {
+        this.reloadPath(scaled, true);
+      } finally {
+        this.isImportingFromApp = false;
+      }
+    } catch (e) {
+      // Invalid syntax — ignore
+    }
+  }
+
+  generateAppPathString(): string {
+    return this.parsedPath.path.map(item => {
+      const type = item.getType();
+      const factors = this.kAppPathScales[type.toUpperCase()] ?? [];
+      const parts: string[] = [type];
+      for (let i = 0; i < item.values.length; i++) {
+        const f = factors[i % factors.length] ?? 1;
+        const v = +(item.values[i] * f).toFixed(4);
+        const d = item.deltas[i] != null ? +(item.deltas[i]! * f).toFixed(4) : null;
+        parts.push(d != null ? `${v}\u00b1${d}` : `${v}`);
+      }
+      if (item.timingAnnotation) parts.push(`@${item.timingAnnotation}`);
+      return parts.join(' ');
+    }).join(' ');
   }
 
   deleteImage(image: Image): void {

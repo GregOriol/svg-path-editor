@@ -11,6 +11,7 @@
                     <div class="input-block" style="flex-grow:1"  [class.has-error]="invalidSyntax">
                         <label class="opaque">Path</label>
                         <textarea
+                            #pathTextarea
                             [ngModel]="rawPath"
                             (ngModelChange)="reloadPath($event, $event.length > 0)"
                             class="app-input"
@@ -24,6 +25,9 @@
                             [matTooltipDisabled]="!invalidSyntax"
                         ></textarea>
                     </div>
+                </div>
+                <div class="path-insert-buttons">
+                    <button (click)="insertIntoPath('\u00b1', pathTextarea)">±</button>
                 </div>
                 <div class="path-buttons">
 
@@ -41,17 +45,24 @@
                         <mat-icon>clear</mat-icon>
                     </button>
 
-                    <button mat-mini-fab
-                        color="accent"
+                    <button mat-mini-fab color="accent"
                         style="transform: none; margin:0 10px 0 auto;"
-                        [matMenuTriggerFor]="appCreate"
-                        [matMenuTriggerData]="{item:null, idx:-1}"
-                        matTooltip="Append new command"
+                        matTooltip="Show 0-1 export for app"
                         matTooltipPosition="below"
                         matTooltipClass="app-tooltip"
+                        (click)="toggleAppPath()"
                     >
-                        <mat-icon>add</mat-icon>
+                        <mat-icon>code</mat-icon>
                     </button>
+                </div>
+                <div *ngIf="showingAppPath" class="app-path-export">
+                    <textarea
+                        [value]="appPathString"
+                        (input)="importFromAppString($any($event.target).value)"
+                        class="app-input"
+                        style="height:60px;"
+                        placeholder="Paste 0-1 app path here"
+                    ></textarea>
                 </div>
             </app-expandable>
 
@@ -535,12 +546,16 @@
 
 
 <div *ngIf="isLeftPanelOpened"  class="footer">
-    <a href="https://github.com/Yqnn/svg-path-editor" target="_blank">
-        <mat-icon svgIcon="github"></mat-icon> GitHub
-    </a>
-    <a href="https://github.com/sponsors/Yqnn" target="_blank">
-        <mat-icon svgIcon="sponsor" class="sponsor"></mat-icon> Sponsor
-    </a>
+    <button mat-mini-fab color="primary"
+        style="transform: none; margin: 4px 8px;"
+        [matMenuTriggerFor]="appCreate"
+        [matMenuTriggerData]="{item:null, idx:-1}"
+        matTooltip="Append new command"
+        matTooltipPosition="right"
+        matTooltipClass="app-tooltip"
+    >
+        <mat-icon>add</mat-icon>
+    </button>
 </div>
 
 <app-import (importPath)="openPath($event, '')"></app-import>

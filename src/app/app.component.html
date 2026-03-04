@@ -145,17 +145,6 @@
                 -->
                 <div class="row">
                     <mat-checkbox [(ngModel)]="cfg.showTicks" style="flex:1">Show Ticks</mat-checkbox>
-                    <div class="input-block" style="flex:1"
-                        [ngClass]="{'disabled': !cfg.showTicks }"
-                    >
-                        <label>Interval</label>
-                        <input
-                            class="app-input"
-                            appFormatter
-                            formatterType="positive-integer"
-                            [(numberValue)]="cfg.tickInterval"
-                            [disabled]="!cfg.showTicks">
-                    </div>
                 </div>
                 <!-- Fill / Preview / Minify output hidden; kept unchecked
                 <div class="row">

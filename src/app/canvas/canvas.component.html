@@ -17,7 +17,7 @@
     />
     <svg:line *ngFor="let x of xGrid; trackBy:trackByIndex"
         class="grid"
-        [ngClass]="{'tick': showTicks && x % tickInterval === 0 }"
+        [ngClass]="{'tick': showTicks && x % gridLabelStep === 0 }"
         [attr.x1]="x"
         [attr.y1]="viewPortY"
         [attr.x2]="x"
@@ -27,17 +27,17 @@
 
     <ng-container *ngIf="!preview && showTicks">
         <ng-container *ngFor="let y of yGrid; trackBy:trackByIndex">
-            <svg:text class="tick" *ngIf="y % tickInterval ===  0" [attr.x]="-4*strokeWidth" [attr.y]="y - 4*strokeWidth" [ngStyle]="{'font-size': strokeWidth*14+'px'}" >{{ y }}</text>
+            <svg:text class="tick" *ngIf="y % gridLabelStep ===  0" [attr.x]="-4*strokeWidth" [attr.y]="y - 4*strokeWidth" [ngStyle]="{'font-size': strokeWidth*14+'px'}" >{{ y }}</text>
         </ng-container>
 
         <ng-container *ngFor="let x of xGrid; trackBy:trackByIndex">
-            <svg:text class="tick" *ngIf="x !== 0 && x % tickInterval === 0" [attr.x]="x - 4*strokeWidth" [attr.y]="-4*strokeWidth" [ngStyle]="{'font-size': strokeWidth*14+'px'}">{{ x }}</text>
+            <svg:text class="tick" *ngIf="x !== 0 && x % gridLabelStep === 0" [attr.x]="x - 4*strokeWidth" [attr.y]="-4*strokeWidth" [ngStyle]="{'font-size': strokeWidth*14+'px'}">{{ x }}</text>
         </ng-container>
     </ng-container>
 
     <svg:line *ngFor="let y of yGrid; trackBy:trackByIndex"
         class="grid"
-        [ngClass]="{'tick': showTicks && y % tickInterval === 0 }"
+        [ngClass]="{'tick': showTicks && y % gridLabelStep === 0 }"
         [attr.x1]="viewPortX"
         [attr.y1]="y"
         [attr.x2]="viewPortX + viewPortWidth"

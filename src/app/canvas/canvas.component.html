@@ -60,10 +60,16 @@
     </ng-container>
 
 
-    <!-- Screen area reference: 100×75 units (width-based scale, 4:3 ratio) -->
+    <!-- Screen area reference: 1024×768 units (4:3 ratio) -->
     <svg:rect
         class="screen-rect"
-        x="0" y="0" width="100" height="75"
+        x="0" y="0" width="1024" height="768"
+        [attr.stroke-width]="strokeWidth"
+    />
+    <!-- Wider iPad reference: 4.3:3 ratio, same height, centered -->
+    <svg:rect
+        class="screen-rect screen-rect-wide"
+        x="-38.67" y="0" width="1101.33" height="768"
         [attr.stroke-width]="strokeWidth"
     />
 

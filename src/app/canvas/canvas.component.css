@@ -23,6 +23,9 @@ rect.screen-rect {
     stroke-dasharray: 4 4;
     pointer-events: none;
 }
+rect.screen-rect-wide {
+    stroke: rgba(100, 220, 180, 0.35);
+}
 
 line.grid {
     stroke:#353536;

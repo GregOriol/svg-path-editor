@@ -45,24 +45,21 @@
                         <mat-icon>clear</mat-icon>
                     </button>
 
-                    <button mat-mini-fab color="accent"
-                        style="transform: none; margin:0 10px 0 auto;"
-                        matTooltip="Show 0-1 export for app"
-                        matTooltipPosition="below"
-                        matTooltipClass="app-tooltip"
-                        (click)="toggleAppPath()"
-                    >
-                        <mat-icon>code</mat-icon>
-                    </button>
                 </div>
-                <div *ngIf="showingAppPath" class="app-path-export">
-                    <textarea
-                        [value]="appPathString"
-                        (input)="importFromAppString($any($event.target).value)"
-                        class="app-input"
-                        style="height:60px;"
-                        placeholder="Paste 0-1 app path here"
-                    ></textarea>
+            </app-expandable>
+
+            <app-expandable panelTitle="App Export" [opened]="false">
+                <div class="row">
+                    <div class="input-block" style="flex-grow:1">
+                        <label class="opaque">0-1 path</label>
+                        <textarea
+                            [value]="appPathString"
+                            (input)="importFromAppString($any($event.target).value)"
+                            class="app-input"
+                            style="height:80px;"
+                            placeholder="Paste 0-1 app path here"
+                        ></textarea>
+                    </div>
                 </div>
             </app-expandable>
 

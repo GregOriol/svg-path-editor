@@ -82,7 +82,6 @@ export class AppComponent implements AfterViewInit {
   isLeftPanelOpened = true;
   isContextualMenuOpened = false;
   isEditingImages = false;
-  showingAppPath = false;
   appPathString = '';
   private isImportingFromApp = false;
 
@@ -448,7 +447,7 @@ export class AppComponent implements AfterViewInit {
   afterModelChange() {
     this.reloadPoints();
     this.rawPath = this.parsedPath.asExtendedString(4, this.cfg.minifyOutput);
-    if (this.showingAppPath && !this.isImportingFromApp) {
+    if (!this.isImportingFromApp) {
       this.appPathString = this.generateAppPathString();
     }
   }
@@ -558,7 +557,7 @@ export class AppComponent implements AfterViewInit {
       if (autozoom) {
         this.zoomAuto();
       }
-      if (this.showingAppPath && !this.isImportingFromApp) {
+      if (!this.isImportingFromApp) {
         this.appPathString = this.generateAppPathString();
       }
     } catch (e) {
@@ -578,12 +577,6 @@ export class AppComponent implements AfterViewInit {
     this.isLeftPanelOpened = !this.isLeftPanelOpened;
   }
 
-  toggleAppPath(): void {
-    this.showingAppPath = !this.showingAppPath;
-    if (this.showingAppPath) {
-      this.appPathString = this.generateAppPathString();
-    }
-  }
 
   importFromAppString(str: string): void {
     if (!str.trim()) return;
